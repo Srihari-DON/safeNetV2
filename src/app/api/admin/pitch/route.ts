@@ -32,11 +32,11 @@ function calculatePitchMetrics(params: {
     estimatedMonthlyOpsCostInr,
     estimatedIncidentReductionPct,
     investorNarrative: {
-      headline: 'Hybrid moderation stack with API + human review loop',
+      headline: 'Women-first digital safety stack with API + human review loop',
       proofPoints: [
-        `${activeModerators} trained moderators active`,
-        `${dailyCapacity} items/day review capacity`,
-        `${highRiskRate}% high-risk capture rate`,
+        `${activeModerators} trained women-safety moderators active`,
+        `${dailyCapacity} interactions/day triage capacity for harassment reports`,
+        `${highRiskRate}% high-risk abuse capture rate with human escalation`,
       ],
     },
   };

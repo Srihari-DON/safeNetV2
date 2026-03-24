@@ -82,7 +82,7 @@ export default function ChatDemoPage() {
       <section className="card stack">
         <h1 style={{ margin: 0 }}>Chat Integration Demo</h1>
         <p className="muted" style={{ margin: 0 }}>
-          This chat route is gated by SafeNet moderation before returning a response.
+          This chat route is gated by SafeNet women-safety moderation before returning a response.
         </p>
       </section>
 
@@ -103,7 +103,7 @@ export default function ChatDemoPage() {
             rows={3}
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Type a message to test SafeNet chat moderation"
+            placeholder="Type a message to test women-safety chat moderation"
           />
           <button className="button" type="submit" disabled={loading}>
             {loading ? 'Sending...' : 'Send Message'}

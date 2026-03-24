@@ -8,15 +8,21 @@ type Signal = {
 
 const SIGNALS: Signal[] = [
   { term: 'kill', weight: 30, reason: 'Explicit violence language' },
-  { term: 'rape', weight: 40, reason: 'Sexual violence indicator' },
-  { term: 'suicide', weight: 30, reason: 'Self-harm indicator' },
-  { term: 'nude', weight: 20, reason: 'Sexual exploitation indicator' },
+  { term: 'rape', weight: 45, reason: 'Sexual violence indicator' },
+  { term: 'acid attack', weight: 50, reason: 'Gendered violence threat indicator' },
+  { term: 'stalk', weight: 28, reason: 'Stalking and persistent harassment indicator' },
+  { term: 'leak your photos', weight: 45, reason: 'Image-based abuse or blackmail indicator' },
+  { term: 'morph your photo', weight: 40, reason: 'Non-consensual intimate imagery indicator' },
+  { term: 'send nudes', weight: 32, reason: 'Sexual coercion indicator' },
+  { term: 'dowry', weight: 24, reason: 'Gender-based abuse context indicator' },
+  { term: 'slut', weight: 30, reason: 'Misogynistic abuse indicator' },
+  { term: 'bitch', weight: 22, reason: 'Gender-targeted abusive language indicator' },
   { term: 'child', weight: 25, reason: 'Potential child safety context' },
+  { term: 'minor', weight: 20, reason: 'Minor safety mention' },
+  { term: 'address', weight: 14, reason: 'Possible doxxing context' },
   { term: 'dm me', weight: 10, reason: 'Private contact solicitation' },
   { term: 'hate', weight: 18, reason: 'Hostile speech pattern' },
   { term: 'slur', weight: 25, reason: 'Hate term marker' },
-  { term: 'address', weight: 12, reason: 'Possible doxxing context' },
-  { term: 'minor', weight: 20, reason: 'Minor safety mention' },
 ];
 
 export function evaluateContent(text: string) {
@@ -51,15 +57,15 @@ export function evaluateContent(text: string) {
   const slaMinutes = decision === 'ESCALATED' ? 15 : decision === 'FLAGGED' ? 60 : 240;
 
   const instruction = [
-    'Role: Safety moderation assistant.',
-    'Goal: Classify content with strict child-safety and abuse handling.',
+    'Role: Women-first digital safety moderation assistant.',
+    'Goal: Detect and triage online abuse, stalking, coercion, and image-based harm targeting women and girls.',
     `Input: ${text}`,
     `Risk score: ${score}`,
     `Recommended action: ${decision}`,
     'Rules:',
-    '1) Escalate immediately for child exploitation, threats, or doxxing intent.',
-    '2) Flag hateful harassment and sexual coercion for human review.',
-    '3) Mark safe only when no abuse indicators appear.',
+    '1) Escalate immediately for threats of sexual/gendered violence, blackmail, stalking, or doxxing intent.',
+    '2) Flag misogynistic harassment, coercive sexual requests, and repeat intimidation for human review.',
+    '3) Mark safe only when no abuse indicators appear and context is non-threatening.',
     '4) Return machine-readable JSON with fields: decision, confidence, reasons, policy_tags.',
     `5) Target response SLA: ${slaMinutes} minutes.`,
   ].join('\n');

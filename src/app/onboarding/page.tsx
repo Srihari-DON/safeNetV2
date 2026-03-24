@@ -44,7 +44,7 @@ export default function OnboardingPage() {
         throw new Error(result.error || 'Registration failed.');
       }
 
-      setMessage(`Registered ${result.data?.name}. You can now moderate content.`);
+      setMessage(`Registered ${result.data?.name}. You can now moderate women-safety reports.`);
       setForm({
         name: '',
         email: '',
@@ -65,7 +65,7 @@ export default function OnboardingPage() {
       <section className="card stack">
         <h1 style={{ margin: 0 }}>Moderator Onboarding</h1>
         <p className="muted" style={{ margin: 0 }}>
-          Register new moderators with a clean, no-friction workflow.
+          Register women-safety moderators for cyber abuse triage and victim-safe escalation workflows.
         </p>
       </section>
 

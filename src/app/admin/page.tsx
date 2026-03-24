@@ -44,7 +44,7 @@ export default function AdminPage() {
       <section className="card stack">
         <h1 style={{ margin: 0 }}>Admin Portal</h1>
         <p className="muted" style={{ margin: 0 }}>
-          Live system status from production data.
+          Live women-digital-safety operations metrics from production data.
         </p>
       </section>
 

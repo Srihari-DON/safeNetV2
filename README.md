@@ -4,7 +4,9 @@ A fresh MVP focused on three working products:
 
 1. Moderator onboarding portal
 2. Moderator decision portal
-3. AI moderation-instruction API for company AI pipelines
+3. Women-safety AI moderation API for company chat/social pipelines
+
+Core mission: improve digital safety and cyber-awareness for women through preventive moderation, rapid triage, and accountable human escalation.
 
 ## Stack
 

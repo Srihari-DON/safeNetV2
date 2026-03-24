@@ -12,8 +12,8 @@ function buildSafeReply(message: string) {
   if (!trimmed) return 'Could you share more details?';
 
   return [
-    'Thanks for your message. I can help with that.',
-    'SafeNet check: no high-risk policy signal detected.',
+    'Thanks for your message. I can help with that safely.',
+    'SafeNet women-safety check: no high-risk abuse signal detected.',
     `Summary: ${trimmed.slice(0, 180)}`,
   ].join(' ');
 }
@@ -57,7 +57,7 @@ export async function POST(request: Request) {
     const traceId = `trace-${Date.now()}`;
 
     if (decision === 'ESCALATED') {
-      const queued = await queueForHumanReview(message, 'chat-escalated');
+      const queued = await queueForHumanReview(message, 'women-safety-chat-escalated');
 
       return NextResponse.json({
         success: true,
@@ -66,7 +66,7 @@ export async function POST(request: Request) {
           blocked: true,
           needsRewrite: false,
           action: 'ESCALATED',
-          reply: 'This message was blocked for safety review.',
+          reply: 'This message was blocked due to severe women-safety risk and sent for urgent review.',
           traceId,
           userId,
           sessionId,
@@ -84,7 +84,7 @@ export async function POST(request: Request) {
     }
 
     if (decision === 'FLAGGED') {
-      const queued = await queueForHumanReview(message, 'chat-flagged');
+      const queued = await queueForHumanReview(message, 'women-safety-chat-flagged');
 
       return NextResponse.json({
         success: true,
@@ -93,7 +93,7 @@ export async function POST(request: Request) {
           blocked: false,
           needsRewrite: true,
           action: 'FLAGGED',
-          reply: 'Your message may violate safety policy. Please rephrase and try again.',
+          reply: 'Your message may contain harassment or coercive content. Please rephrase and try again.',
           traceId,
           userId,
           sessionId,

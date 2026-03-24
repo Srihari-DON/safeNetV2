@@ -14,7 +14,7 @@ export async function POST(request: Request) {
 
     const body = await request.json();
     const text = String(body?.text || '').trim();
-    const source = String(body?.source || 'api-ingest').trim();
+    const source = String(body?.source || 'women-safety-api-ingest').trim();
 
     if (!text) {
       return NextResponse.json(

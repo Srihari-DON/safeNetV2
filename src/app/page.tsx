@@ -4,7 +4,7 @@ export default function Home() {
       <section className="card stack">
         <h1 style={{ fontSize: 28, fontWeight: 700, margin: 0 }}>SafeNet MVP v2</h1>
         <p className="muted" style={{ margin: 0 }}>
-          Preventive moderation stack with two products: moderator training portal and company-facing AI guidance API.
+          Women-first digital safety stack: moderator training, cyber abuse triage, and company-facing AI safety guidance API.
         </p>
       </section>
 

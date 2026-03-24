@@ -15,7 +15,7 @@ type AiResponse = {
 };
 
 export default function AiLabPage() {
-  const [content, setContent] = useState('I know where your school is, send your address now.');
+  const [content, setContent] = useState('Send private photos or I will leak your old pictures to everyone.');
   const [output, setOutput] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -50,7 +50,7 @@ export default function AiLabPage() {
       <section className="card stack">
         <h1 style={{ margin: 0 }}>AI Instructions API Lab</h1>
         <p className="muted" style={{ margin: 0 }}>
-          This is the company-facing endpoint that returns structured moderation instructions for local AI pipelines.
+          Company-facing endpoint for women-safety moderation guidance in chat and social platforms.
         </p>
       </section>
 

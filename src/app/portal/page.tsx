@@ -104,7 +104,7 @@ export default function PortalPage() {
       <section className="card stack">
         <h1 style={{ margin: 0 }}>Moderator Portal</h1>
         <p className="muted" style={{ margin: 0 }}>
-          Review queue content and submit decisions in one click.
+          Review cyber abuse reports affecting women and submit safe, explainable decisions.
         </p>
       </section>
 
@@ -128,7 +128,7 @@ export default function PortalPage() {
 
       <section className="card stack">
         {loading ? <p className="muted">Loading queue...</p> : null}
-        {!loading && !current ? <p className="muted">Queue is empty. Add more sample content or wait for new items.</p> : null}
+        {!loading && !current ? <p className="muted">Queue is empty. New women-safety incident reports will appear here.</p> : null}
         {!loading && current ? (
           <>
             <p style={{ margin: 0, fontWeight: 600 }}>Current Item</p>
@@ -144,7 +144,7 @@ export default function PortalPage() {
                 rows={3}
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
-                placeholder="Reason for flagging or escalation"
+                placeholder="Reason (for example: stalking threat, image blackmail, doxxing risk)"
               />
             </label>
 

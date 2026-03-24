@@ -43,8 +43,8 @@ function createInitialStore(): FallbackStore {
     moderators: [
       {
         id: 'fallback-mod-1',
-        name: 'Demo Moderator',
-        email: 'demo@safenet.ai',
+        name: 'Safety Lead - Women Helpline Desk',
+        email: 'women-safety-demo@safenet.ai',
         phone: '+91-90000-00000',
         language: 'English',
         hoursPerWeek: 20,
@@ -55,16 +55,16 @@ function createInitialStore(): FallbackStore {
     queue: [
       {
         id: 'fallback-content-1',
-        text: 'I know where your school is, send me your address now.',
-        source: 'chat-stream',
+        text: 'I know where you travel every day. Share your location now.',
+        source: 'women-community-chat',
         status: 'PENDING',
         createdAt: now,
         updatedAt: now,
       },
       {
         id: 'fallback-content-2',
-        text: 'You are useless and should disappear.',
-        source: 'community-feed',
+        text: 'Send private photos or I will leak your old images online.',
+        source: 'safety-report-feed',
         status: 'PENDING',
         createdAt: now,
         updatedAt: now,
