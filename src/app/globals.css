@@ -1,0 +1,68 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #f3f4f6;
+  --surface: #ffffff;
+  --text: #111827;
+  --muted: #6b7280;
+  --border: #d1d5db;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+}
+
+.shell {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 24px 16px 40px;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+}
+
+.stack {
+  display: grid;
+  gap: 12px;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.input,
+.select,
+.textarea,
+.button {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font: inherit;
+  background: #fff;
+}
+
+.button {
+  cursor: pointer;
+  background: #111827;
+  border-color: #111827;
+  color: #fff;
+  font-weight: 600;
+}
+
+.button.secondary {
+  background: #fff;
+  color: #111827;
+}
+
+.button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

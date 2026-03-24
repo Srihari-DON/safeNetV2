@@ -1,0 +1,63 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum ModeratorStatus {
+  NEW
+  ACTIVE
+}
+
+enum ContentStatus {
+  PENDING
+  SAFE
+  FLAGGED
+  ESCALATED
+}
+
+model Moderator {
+  id             String            @id @default(cuid())
+  name           String
+  email          String            @unique
+  phone          String
+  language       String
+  hoursPerWeek   Int
+  status         ModeratorStatus   @default(NEW)
+  createdAt      DateTime          @default(now())
+  decisions      ModerationDecision[]
+}
+
+model ContentItem {
+  id          String               @id @default(cuid())
+  text        String               @db.Text
+  source      String               @default("manual")
+  status      ContentStatus        @default(PENDING)
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+  decisions   ModerationDecision[]
+}
+
+model ModerationDecision {
+  id             String        @id @default(cuid())
+  contentId      String
+  moderatorId    String
+  decision       ContentStatus
+  reason         String?       @db.Text
+  createdAt      DateTime      @default(now())
+
+  content        ContentItem   @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  moderator      Moderator     @relation(fields: [moderatorId], references: [id], onDelete: Cascade)
+
+  @@index([contentId])
+  @@index([moderatorId])
+}
