@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { canUseDatabase, submitFallbackDecision } from '@/lib/fallbackData';
 import { ContentStatus } from '@prisma/client';
+import { sendEscalationWebhook } from '@/lib/webhook';
 
 const allowed = new Set(['SAFE', 'FLAGGED', 'ESCALATED']);
 type ReviewDecision = 'SAFE' | 'FLAGGED' | 'ESCALATED';
@@ -31,6 +32,18 @@ export async function POST(request: Request) {
         reason,
       });
 
+      if (typedDecision === 'FLAGGED' || typedDecision === 'ESCALATED') {
+        await sendEscalationWebhook({
+          event: typedDecision === 'ESCALATED' ? 'incident.escalated' : 'incident.flagged',
+          contentId,
+          decision: typedDecision,
+          source: 'fallback-moderation-review',
+          reason,
+          moderatorId,
+          occurredAt: new Date().toISOString(),
+        });
+      }
+
       return NextResponse.json({
         success: true,
         data: fallback,
@@ -51,6 +64,18 @@ export async function POST(request: Request) {
         },
       }),
     ]);
+
+    if (typedDecision === 'FLAGGED' || typedDecision === 'ESCALATED') {
+      await sendEscalationWebhook({
+        event: typedDecision === 'ESCALATED' ? 'incident.escalated' : 'incident.flagged',
+        contentId,
+        decision: typedDecision,
+        source: updatedContent.source,
+        reason,
+        moderatorId,
+        occurredAt: new Date().toISOString(),
+      });
+    }
 
     return NextResponse.json({
       success: true,

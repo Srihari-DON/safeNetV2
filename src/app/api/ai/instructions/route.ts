@@ -27,7 +27,7 @@ export async function POST(request: Request) {
     return NextResponse.json({
       success: true,
       data: {
-        policyVersion: 'mvp-v1',
+        policyVersion: 'mvp-v1.1',
         mode: access.protectedMode ? 'api-key-protected' : 'demo-open',
         contentId,
         locale,
@@ -40,6 +40,8 @@ export async function POST(request: Request) {
         escalationPriority: analysis.escalationPriority,
         slaMinutes: analysis.slaMinutes,
         policyTags: analysis.policyTags,
+        categories: analysis.categories,
+        rewriteSuggestion: analysis.rewriteSuggestion,
         signals: analysis.matchedSignals,
         reasons: analysis.matchedSignals.map((s) => s.reason),
         instruction: analysis.instruction,

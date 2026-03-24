@@ -167,12 +167,17 @@ export function submitFallbackDecision(input: {
 
 export function getFallbackOverview() {
   const s = store();
+  const avgReviewMinutes = getFallbackAverageReviewMinutes();
+  const slaBreaches = getFallbackSlaBreaches();
+
   return {
     moderators: s.moderators.length,
     pending: s.queue.filter((item) => item.status === 'PENDING').length,
     flagged: s.queue.filter((item) => item.status === 'FLAGGED').length,
     escalated: s.queue.filter((item) => item.status === 'ESCALATED').length,
     reviewed: s.decisions.length,
+    avgReviewMinutes,
+    slaBreaches,
   };
 }
 
@@ -198,4 +203,68 @@ export function getFallbackAudit(limit = 25) {
     moderatorId: d.moderatorId,
     moderatorName: modMap.get(d.moderatorId)?.name || 'Unknown Moderator',
   }));
+}
+
+function getFallbackAverageReviewMinutes() {
+  const s = store();
+  if (s.decisions.length === 0) return 0;
+
+  const queueMap = new Map(s.queue.map((q) => [q.id, q]));
+  const durations = s.decisions
+    .map((d) => {
+      const q = queueMap.get(d.contentId);
+      if (!q) return null;
+      const created = new Date(q.createdAt).getTime();
+      const decided = new Date(d.createdAt).getTime();
+      const minutes = Math.max(0, Math.round((decided - created) / 60000));
+      return Number.isFinite(minutes) ? minutes : null;
+    })
+    .filter((value): value is number => value !== null);
+
+  if (durations.length === 0) return 0;
+  return Number((durations.reduce((sum, item) => sum + item, 0) / durations.length).toFixed(1));
+}
+
+function getFallbackSlaBreaches() {
+  const s = store();
+  const queueMap = new Map(s.queue.map((q) => [q.id, q]));
+  return s.decisions.filter((d) => {
+    const q = queueMap.get(d.contentId);
+    if (!q) return false;
+
+    const created = new Date(q.createdAt).getTime();
+    const decided = new Date(d.createdAt).getTime();
+    const minutes = Math.max(0, Math.round((decided - created) / 60000));
+    const sla = d.decision === 'ESCALATED' ? 15 : d.decision === 'FLAGGED' ? 60 : 240;
+    return minutes > sla;
+  }).length;
+}
+
+export function getFallbackEvidence(limit = 50) {
+  const s = store();
+  const modMap = new Map(s.moderators.map((m) => [m.id, m]));
+  const queueMap = new Map(s.queue.map((q) => [q.id, q]));
+
+  return s.decisions
+    .filter((d) => d.decision === 'ESCALATED' || d.decision === 'FLAGGED')
+    .slice(0, limit)
+    .map((d) => {
+      const item = queueMap.get(d.contentId);
+      const moderator = modMap.get(d.moderatorId);
+      return {
+        decisionId: d.id,
+        contentId: d.contentId,
+        decision: d.decision,
+        reason: d.reason,
+        decisionAt: d.createdAt,
+        contentText: item?.text || 'Unavailable in fallback snapshot',
+        source: item?.source || 'unknown',
+        reportedAt: item?.createdAt || null,
+        moderator: {
+          id: d.moderatorId,
+          name: moderator?.name || 'Unknown Moderator',
+          email: moderator?.email || 'unknown@safenet.ai',
+        },
+      };
+    });
 }

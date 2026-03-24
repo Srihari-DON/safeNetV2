@@ -59,6 +59,7 @@ Core mission: improve digital safety and cyber-awareness for women through preve
 - POST /api/ai/instructions
 - POST /api/moderation/ingest
 - GET /api/moderation/audit
+- GET /api/moderation/evidence
 - GET /api/admin/pitch
 - POST /api/chat/respond
 
@@ -69,6 +70,10 @@ Core mission: improve digital safety and cyber-awareness for women through preve
 - `GET /api/moderation/audit` returns decision history for compliance reporting.
 - `GET /api/admin/pitch` returns investor-friendly capacity and impact metrics.
 - `POST /api/chat/respond` is a chat-safe gateway endpoint that blocks/escalates risky prompts before response.
+- `GET /api/moderation/evidence` exports flagged/escalated evidence records for compliance and partner handoff.
+
+Optional automation hook:
+- Set `SAFENET_ESCALATION_WEBHOOK_URL` to receive JSON callbacks when incidents are flagged/escalated.
 
 If `SAFENET_API_KEY` is set, call protected endpoints with one of:
 - Header: `x-api-key: <key>`

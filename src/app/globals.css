@@ -1,16 +1,18 @@
 @import "tailwindcss";
 
 :root {
-  --bg: #f3f4f6;
+  --bg: #f4f6f8;
   --surface: #ffffff;
   --text: #111827;
   --muted: #6b7280;
-  --border: #d1d5db;
+  --border: #d3dae3;
+  --accent: #0f172a;
+  --chip-bg: #eef2f7;
 }
 
 body {
   margin: 0;
-  background: var(--bg);
+  background: radial-gradient(circle at 10% 0%, #eef3f8 0%, var(--bg) 45%);
   color: var(--text);
   font-family: var(--font-geist-sans), system-ui, sans-serif;
 }
@@ -26,6 +28,7 @@ body {
   border: 1px solid var(--border);
   border-radius: 10px;
   padding: 16px;
+  box-shadow: 0 1px 0 rgba(17, 24, 39, 0.03);
 }
 
 .stack {
@@ -51,8 +54,8 @@ body {
 
 .button {
   cursor: pointer;
-  background: #111827;
-  border-color: #111827;
+  background: var(--accent);
+  border-color: var(--accent);
   color: #fff;
   font-weight: 600;
 }
@@ -65,4 +68,25 @@ body {
 .button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  background: var(--chip-bg);
+  color: #1f2937;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 3px 10px;
+}
+
+.pill.alert {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.pill.warn {
+  background: #fff4db;
+  color: #92400e;
 }

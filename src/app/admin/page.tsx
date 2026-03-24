@@ -8,6 +8,8 @@ type Metrics = {
   flagged: number;
   escalated: number;
   reviewed: number;
+  avgReviewMinutes?: number;
+  slaBreaches?: number;
 };
 
 export default function AdminPage() {
@@ -58,7 +60,15 @@ export default function AdminPage() {
             <div className="card"><strong>Pending Queue</strong><p>{data.pending}</p></div>
             <div className="card"><strong>Flagged</strong><p>{data.flagged}</p></div>
             <div className="card"><strong>Escalated</strong><p>{data.escalated}</p></div>
-            <div className="card" style={{ gridColumn: '1 / -1' }}><strong>Total Reviewed</strong><p>{data.reviewed}</p></div>
+            <div className="card"><strong>Avg Review Time</strong><p>{data.avgReviewMinutes ?? 0} min</p></div>
+            <div className="card"><strong>SLA Breaches</strong><p>{data.slaBreaches ?? 0}</p></div>
+            <div className="card" style={{ gridColumn: '1 / -1' }}>
+              <strong>Total Reviewed</strong>
+              <p>{data.reviewed}</p>
+              <span className={data.slaBreaches && data.slaBreaches > 0 ? 'pill warn' : 'pill'}>
+                {data.slaBreaches && data.slaBreaches > 0 ? 'Needs response-time attention' : 'Response-time on track'}
+              </span>
+            </div>
           </div>
         ) : null}
 

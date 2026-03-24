@@ -136,6 +136,11 @@ export default function PortalPage() {
             <p className="muted" style={{ margin: 0, fontSize: 13 }}>
               Source: {current.source}
             </p>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              <span className="pill">PENDING</span>
+              <span className="pill">Received: {new Date(current.createdAt).toLocaleTimeString()}</span>
+              <span className="pill">Target SLA: 60 min</span>
+            </div>
 
             <label className="stack" style={{ gap: 6 }}>
               <span>Reason (optional)</span>

@@ -4,6 +4,7 @@ import { evaluateContent } from '@/lib/moderationEngine';
 import { db } from '@/lib/db';
 import { addFallbackContent, canUseDatabase } from '@/lib/fallbackData';
 import { requireServiceApiKey } from '@/lib/security';
+import { sendEscalationWebhook } from '@/lib/webhook';
 
 type ChatDecision = 'SAFE' | 'FLAGGED' | 'ESCALATED';
 
@@ -58,6 +59,18 @@ export async function POST(request: Request) {
 
     if (decision === 'ESCALATED') {
       const queued = await queueForHumanReview(message, 'women-safety-chat-escalated');
+      await sendEscalationWebhook({
+        event: 'incident.escalated',
+        contentId: queued.id,
+        decision,
+        source: 'women-safety-chat-escalated',
+        reason: analysis.matchedSignals.map((s) => s.reason).join('; ') || null,
+        riskScore: analysis.score,
+        riskLevel: analysis.riskLevel,
+        escalationPriority: analysis.escalationPriority,
+        policyTags: analysis.policyTags,
+        occurredAt: new Date().toISOString(),
+      });
 
       return NextResponse.json({
         success: true,
@@ -76,8 +89,10 @@ export async function POST(request: Request) {
             riskLevel: analysis.riskLevel,
             confidence: Number(analysis.confidence.toFixed(2)),
             policyTags: analysis.policyTags,
+            categories: analysis.categories,
             escalationPriority: analysis.escalationPriority,
             slaMinutes: analysis.slaMinutes,
+            rewriteSuggestion: analysis.rewriteSuggestion,
           },
         },
       });
@@ -85,6 +100,18 @@ export async function POST(request: Request) {
 
     if (decision === 'FLAGGED') {
       const queued = await queueForHumanReview(message, 'women-safety-chat-flagged');
+      await sendEscalationWebhook({
+        event: 'incident.flagged',
+        contentId: queued.id,
+        decision,
+        source: 'women-safety-chat-flagged',
+        reason: analysis.matchedSignals.map((s) => s.reason).join('; ') || null,
+        riskScore: analysis.score,
+        riskLevel: analysis.riskLevel,
+        escalationPriority: analysis.escalationPriority,
+        policyTags: analysis.policyTags,
+        occurredAt: new Date().toISOString(),
+      });
 
       return NextResponse.json({
         success: true,
@@ -103,8 +130,10 @@ export async function POST(request: Request) {
             riskLevel: analysis.riskLevel,
             confidence: Number(analysis.confidence.toFixed(2)),
             policyTags: analysis.policyTags,
+            categories: analysis.categories,
             escalationPriority: analysis.escalationPriority,
             slaMinutes: analysis.slaMinutes,
+            rewriteSuggestion: analysis.rewriteSuggestion,
           },
         },
       });
@@ -126,8 +155,10 @@ export async function POST(request: Request) {
           riskLevel: analysis.riskLevel,
           confidence: Number(analysis.confidence.toFixed(2)),
           policyTags: analysis.policyTags,
+          categories: analysis.categories,
           escalationPriority: analysis.escalationPriority,
           slaMinutes: analysis.slaMinutes,
+          rewriteSuggestion: analysis.rewriteSuggestion,
         },
       },
     });

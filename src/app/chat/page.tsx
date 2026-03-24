@@ -18,8 +18,10 @@ type ChatApiResponse = {
       riskLevel: string;
       confidence: number;
       policyTags: string[];
+      categories?: string[];
       escalationPriority: string;
       slaMinutes: number;
+      rewriteSuggestion?: string;
     };
   };
 };
@@ -29,11 +31,20 @@ type ChatTurn = {
   text: string;
 };
 
+type ModerationMeta = {
+  action: 'SAFE' | 'FLAGGED' | 'ESCALATED';
+  riskScore: number;
+  riskLevel: string;
+  categories: string[];
+  rewriteSuggestion?: string;
+};
+
 export default function ChatDemoPage() {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [turns, setTurns] = useState<ChatTurn[]>([]);
   const [meta, setMeta] = useState('');
+  const [moderationMeta, setModerationMeta] = useState<ModerationMeta | null>(null);
 
   const send = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -63,6 +74,13 @@ export default function ChatDemoPage() {
 
       const d = payload.data;
       setTurns((prev) => [...prev, { role: 'assistant', text: d.reply }]);
+      setModerationMeta({
+        action: d.action,
+        riskScore: d.moderation.riskScore,
+        riskLevel: d.moderation.riskLevel,
+        categories: d.moderation.categories || [],
+        rewriteSuggestion: d.moderation.rewriteSuggestion,
+      });
       setMeta(
         `action=${d.action} | risk=${d.moderation.riskScore} | confidence=${d.moderation.confidence} | trace=${d.traceId}${
           d.queuedItemId ? ` | queued=${d.queuedItemId}` : ''
@@ -72,6 +90,7 @@ export default function ChatDemoPage() {
       const text = error instanceof Error ? error.message : 'Chat response failed.';
       setTurns((prev) => [...prev, { role: 'assistant', text }]);
       setMeta('request_failed');
+      setModerationMeta(null);
     } finally {
       setLoading(false);
     }
@@ -111,6 +130,26 @@ export default function ChatDemoPage() {
         </form>
 
         <p className="muted" style={{ margin: 0 }}>{meta || 'No moderation metadata yet.'}</p>
+
+        {moderationMeta ? (
+          <div className="card stack" style={{ gap: 8 }}>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              <span className={moderationMeta.action === 'ESCALATED' ? 'pill alert' : moderationMeta.action === 'FLAGGED' ? 'pill warn' : 'pill'}>
+                {moderationMeta.action}
+              </span>
+              <span className="pill">risk {moderationMeta.riskScore}</span>
+              <span className="pill">{moderationMeta.riskLevel}</span>
+              {moderationMeta.categories.map((cat) => (
+                <span key={cat} className="pill">{cat}</span>
+              ))}
+            </div>
+            {moderationMeta.action === 'FLAGGED' && moderationMeta.rewriteSuggestion ? (
+              <p className="muted" style={{ margin: 0 }}>
+                Safer rewrite suggestion: {moderationMeta.rewriteSuggestion}
+              </p>
+            ) : null}
+          </div>
+        ) : null}
       </section>
     </main>
   );
