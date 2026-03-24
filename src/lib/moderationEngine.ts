@@ -20,6 +20,7 @@ const SIGNALS: Signal[] = [
 ];
 
 export function evaluateContent(text: string) {
+  const startedAt = Date.now();
   const normalized = text.toLowerCase();
   const matched = SIGNALS.filter((s) => normalized.includes(s.term));
   const score = matched.reduce((sum, s) => sum + s.weight, 0);
@@ -38,6 +39,17 @@ export function evaluateContent(text: string) {
     riskLevel = 'medium';
   }
 
+  const policyTags = matched.map((s) =>
+    s.reason
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '_')
+      .replace(/^_|_$/g, '')
+  );
+
+  const confidence = Math.min(0.98, Math.max(0.5, 0.5 + score / 120));
+  const escalationPriority = decision === 'ESCALATED' ? 'P1' : decision === 'FLAGGED' ? 'P2' : 'P4';
+  const slaMinutes = decision === 'ESCALATED' ? 15 : decision === 'FLAGGED' ? 60 : 240;
+
   const instruction = [
     'Role: Safety moderation assistant.',
     'Goal: Classify content with strict child-safety and abuse handling.',
@@ -49,12 +61,18 @@ export function evaluateContent(text: string) {
     '2) Flag hateful harassment and sexual coercion for human review.',
     '3) Mark safe only when no abuse indicators appear.',
     '4) Return machine-readable JSON with fields: decision, confidence, reasons, policy_tags.',
+    `5) Target response SLA: ${slaMinutes} minutes.`,
   ].join('\n');
 
   return {
+    processingMs: Date.now() - startedAt,
     score,
     decision,
     riskLevel,
+    confidence,
+    policyTags,
+    escalationPriority,
+    slaMinutes,
     matchedSignals: matched,
     instruction,
   };

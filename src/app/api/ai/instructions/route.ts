@@ -1,10 +1,19 @@
 import { NextResponse } from 'next/server';
 import { evaluateContent } from '@/lib/moderationEngine';
+import { requireServiceApiKey } from '@/lib/security';
 
 export async function POST(request: Request) {
   try {
+    const access = requireServiceApiKey(request);
+    if (!access.ok) {
+      return access.response;
+    }
+
     const body = await request.json();
     const content = String(body?.content || '').trim();
+    const contentId = String(body?.contentId || `ingest-${Date.now()}`);
+    const locale = String(body?.locale || 'en-IN');
+    const platform = String(body?.platform || 'unknown');
 
     if (!content) {
       return NextResponse.json(
@@ -19,12 +28,22 @@ export async function POST(request: Request) {
       success: true,
       data: {
         policyVersion: 'mvp-v1',
+        mode: access.protectedMode ? 'api-key-protected' : 'demo-open',
+        contentId,
+        locale,
+        platform,
         input: content,
         riskScore: analysis.score,
         riskLevel: analysis.riskLevel,
+        confidence: Number(analysis.confidence.toFixed(2)),
         suggestedDecision: analysis.decision,
+        escalationPriority: analysis.escalationPriority,
+        slaMinutes: analysis.slaMinutes,
+        policyTags: analysis.policyTags,
         signals: analysis.matchedSignals,
+        reasons: analysis.matchedSignals.map((s) => s.reason),
         instruction: analysis.instruction,
+        processingMs: analysis.processingMs,
       },
     });
   } catch (error) {

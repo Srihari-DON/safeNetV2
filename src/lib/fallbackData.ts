@@ -114,6 +114,25 @@ export function getFallbackPendingQueue() {
   return store().queue.filter((item) => item.status === 'PENDING');
 }
 
+export function addFallbackContent(input: {
+  text: string;
+  source: string;
+  status: 'PENDING' | 'SAFE';
+}) {
+  const now = new Date().toISOString();
+  const item: FallbackQueueItem = {
+    id: `fallback-content-${Date.now()}`,
+    text: input.text,
+    source: input.source,
+    status: input.status,
+    createdAt: now,
+    updatedAt: now,
+  };
+
+  store().queue.unshift(item);
+  return item;
+}
+
 export function submitFallbackDecision(input: {
   contentId: string;
   moderatorId: string;
@@ -155,4 +174,28 @@ export function getFallbackOverview() {
     escalated: s.queue.filter((item) => item.status === 'ESCALATED').length,
     reviewed: s.decisions.length,
   };
+}
+
+export function getFallbackSnapshot() {
+  const s = store();
+  return {
+    moderators: s.moderators,
+    queue: s.queue,
+    decisions: s.decisions,
+  };
+}
+
+export function getFallbackAudit(limit = 25) {
+  const s = store();
+  const modMap = new Map(s.moderators.map((m) => [m.id, m]));
+
+  return s.decisions.slice(0, limit).map((d) => ({
+    id: d.id,
+    decision: d.decision,
+    reason: d.reason,
+    createdAt: d.createdAt,
+    contentId: d.contentId,
+    moderatorId: d.moderatorId,
+    moderatorName: modMap.get(d.moderatorId)?.name || 'Unknown Moderator',
+  }));
 }
