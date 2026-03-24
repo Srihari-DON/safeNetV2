@@ -45,6 +45,7 @@ A fresh MVP focused on three working products:
 - /portal: moderation queue and decisions
 - /admin: admin metrics dashboard
 - /ai-lab: test AI instructions endpoint
+- /chat: demo chat flow with moderation gating
 
 ## API Endpoints
 
@@ -57,6 +58,7 @@ A fresh MVP focused on three working products:
 - POST /api/moderation/ingest
 - GET /api/moderation/audit
 - GET /api/admin/pitch
+- POST /api/chat/respond
 
 ### Enterprise/API-ready additions
 
@@ -64,6 +66,7 @@ A fresh MVP focused on three working products:
 - `POST /api/ai/instructions` now returns confidence, policy tags, priority and SLA fields.
 - `GET /api/moderation/audit` returns decision history for compliance reporting.
 - `GET /api/admin/pitch` returns investor-friendly capacity and impact metrics.
+- `POST /api/chat/respond` is a chat-safe gateway endpoint that blocks/escalates risky prompts before response.
 
 If `SAFENET_API_KEY` is set, call protected endpoints with one of:
 - Header: `x-api-key: <key>`

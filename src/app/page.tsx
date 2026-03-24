@@ -22,6 +22,9 @@ export default function Home() {
         <a href="/ai-lab" className="button secondary" style={{ textAlign: 'center', textDecoration: 'none' }}>
           Test AI Instruction API
         </a>
+        <a href="/chat" className="button secondary" style={{ textAlign: 'center', textDecoration: 'none' }}>
+          Open Chat Integration Demo
+        </a>
       </section>
     </main>
   );
