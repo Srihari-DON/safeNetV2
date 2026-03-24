@@ -1,8 +1,10 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { canUseDatabase, submitFallbackDecision } from '@/lib/fallbackData';
+import { ContentStatus } from '@prisma/client';
 
 const allowed = new Set(['SAFE', 'FLAGGED', 'ESCALATED']);
+type ReviewDecision = 'SAFE' | 'FLAGGED' | 'ESCALATED';
 
 export async function POST(request: Request) {
   const body = await request.json().catch(() => ({}));
@@ -19,11 +21,13 @@ export async function POST(request: Request) {
       );
     }
 
+    const typedDecision = decision as ReviewDecision;
+
     if (!canUseDatabase()) {
       const fallback = submitFallbackDecision({
         contentId,
         moderatorId,
-        decision: decision as 'SAFE' | 'FLAGGED' | 'ESCALATED',
+        decision: typedDecision,
         reason,
       });
 
@@ -36,13 +40,13 @@ export async function POST(request: Request) {
     const [updatedContent, moderationDecision] = await db.$transaction([
       db.contentItem.update({
         where: { id: contentId },
-        data: { status: decision },
+        data: { status: typedDecision as ContentStatus },
       }),
       db.moderationDecision.create({
         data: {
           contentId,
           moderatorId,
-          decision,
+          decision: typedDecision as ContentStatus,
           reason,
         },
       }),
@@ -59,7 +63,7 @@ export async function POST(request: Request) {
     const fallback = submitFallbackDecision({
       contentId: contentId || 'fallback-content',
       moderatorId: moderatorId || 'fallback-mod-1',
-      decision: (decision || 'FLAGGED') as 'SAFE' | 'FLAGGED' | 'ESCALATED',
+      decision: (decision || 'FLAGGED') as ReviewDecision,
       reason,
     });
 
