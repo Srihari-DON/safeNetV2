@@ -1,12 +1,16 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { canUseDatabase } from '@/lib/fallbackData';
+import { addFallbackModerator, canUseDatabase } from '@/lib/fallbackData';
 
 export async function POST(request: Request) {
-  try {
-    const body = await request.json();
-    const { name, email, phone, language, hoursPerWeek } = body;
+  const body = await request.json().catch(() => ({}));
+  const name = String(body?.name || '').trim();
+  const email = String(body?.email || '').toLowerCase().trim();
+  const phone = String(body?.phone || '').trim();
+  const language = String(body?.language || '').trim();
+  const hoursPerWeek = Number(body?.hoursPerWeek);
 
+  try {
     if (!name || !email || !phone || !language || !hoursPerWeek) {
       return NextResponse.json(
         { success: false, error: 'Missing required fields.' },
@@ -15,19 +19,18 @@ export async function POST(request: Request) {
     }
 
     if (!canUseDatabase()) {
+      const fallback = addFallbackModerator({
+        name,
+        email,
+        phone,
+        language,
+        hoursPerWeek,
+      });
+
       return NextResponse.json(
         {
           success: true,
-          data: {
-            id: `fallback-${Date.now()}`,
-            name: String(name).trim(),
-            email: String(email).toLowerCase().trim(),
-            phone: String(phone).trim(),
-            language: String(language).trim(),
-            hoursPerWeek: Number(hoursPerWeek),
-            status: 'ACTIVE',
-            createdAt: new Date().toISOString(),
-          },
+          data: fallback,
         },
         { status: 201 }
       );
@@ -35,31 +38,29 @@ export async function POST(request: Request) {
 
     const moderator = await db.moderator.create({
       data: {
-        name: String(name).trim(),
-        email: String(email).toLowerCase().trim(),
-        phone: String(phone).trim(),
-        language: String(language).trim(),
-        hoursPerWeek: Number(hoursPerWeek),
+        name,
+        email,
+        phone,
+        language,
+        hoursPerWeek,
         status: 'ACTIVE',
       },
     });
 
     return NextResponse.json({ success: true, data: moderator }, { status: 201 });
   } catch {
-    const body = await request.json().catch(() => ({}));
+    const fallback = addFallbackModerator({
+      name: name || 'New Moderator',
+      email: email || 'new@safenet.ai',
+      phone: phone || '+91-90000-00000',
+      language: language || 'English',
+      hoursPerWeek: hoursPerWeek || 20,
+    });
+
     return NextResponse.json(
       {
         success: true,
-        data: {
-          id: `fallback-${Date.now()}`,
-          name: String(body?.name || 'New Moderator').trim(),
-          email: String(body?.email || 'new@safenet.ai').toLowerCase().trim(),
-          phone: String(body?.phone || '+91-90000-00000').trim(),
-          language: String(body?.language || 'English').trim(),
-          hoursPerWeek: Number(body?.hoursPerWeek || 20),
-          status: 'ACTIVE',
-          createdAt: new Date().toISOString(),
-        },
+        data: fallback,
       },
       { status: 201 }
     );

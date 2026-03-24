@@ -1,15 +1,18 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { canUseDatabase } from '@/lib/fallbackData';
+import { canUseDatabase, submitFallbackDecision } from '@/lib/fallbackData';
 
 const allowed = new Set(['SAFE', 'FLAGGED', 'ESCALATED']);
 
 export async function POST(request: Request) {
-  try {
-    const body = await request.json();
-    const { contentId, moderatorId, decision, reason } = body;
+  const body = await request.json().catch(() => ({}));
+  const contentId = String(body?.contentId || '');
+  const moderatorId = String(body?.moderatorId || '');
+  const decision = String(body?.decision || '');
+  const reason = body?.reason ? String(body.reason) : null;
 
-    if (!contentId || !moderatorId || !decision || !allowed.has(String(decision))) {
+  try {
+    if (!contentId || !moderatorId || !decision || !allowed.has(decision)) {
       return NextResponse.json(
         { success: false, error: 'Invalid moderation payload.' },
         { status: 400 }
@@ -17,36 +20,30 @@ export async function POST(request: Request) {
     }
 
     if (!canUseDatabase()) {
+      const fallback = submitFallbackDecision({
+        contentId,
+        moderatorId,
+        decision: decision as 'SAFE' | 'FLAGGED' | 'ESCALATED',
+        reason,
+      });
+
       return NextResponse.json({
         success: true,
-        data: {
-          content: {
-            id: String(contentId),
-            status: decision,
-          },
-          moderationDecision: {
-            id: `fallback-${Date.now()}`,
-            contentId: String(contentId),
-            moderatorId: String(moderatorId),
-            decision,
-            reason: reason ? String(reason) : null,
-            createdAt: new Date().toISOString(),
-          },
-        },
+        data: fallback,
       });
     }
 
     const [updatedContent, moderationDecision] = await db.$transaction([
       db.contentItem.update({
-        where: { id: String(contentId) },
+        where: { id: contentId },
         data: { status: decision },
       }),
       db.moderationDecision.create({
         data: {
-          contentId: String(contentId),
-          moderatorId: String(moderatorId),
+          contentId,
+          moderatorId,
           decision,
-          reason: reason ? String(reason) : null,
+          reason,
         },
       }),
     ]);
@@ -59,23 +56,16 @@ export async function POST(request: Request) {
       },
     });
   } catch {
-    const body = await request.json().catch(() => ({}));
+    const fallback = submitFallbackDecision({
+      contentId: contentId || 'fallback-content',
+      moderatorId: moderatorId || 'fallback-mod-1',
+      decision: (decision || 'FLAGGED') as 'SAFE' | 'FLAGGED' | 'ESCALATED',
+      reason,
+    });
+
     return NextResponse.json({
       success: true,
-      data: {
-        content: {
-          id: String(body?.contentId || 'fallback-content'),
-          status: String(body?.decision || 'FLAGGED'),
-        },
-        moderationDecision: {
-          id: `fallback-${Date.now()}`,
-          contentId: String(body?.contentId || 'fallback-content'),
-          moderatorId: String(body?.moderatorId || 'fallback-mod-1'),
-          decision: String(body?.decision || 'FLAGGED'),
-          reason: body?.reason ? String(body.reason) : null,
-          createdAt: new Date().toISOString(),
-        },
-      },
+      data: fallback,
     });
   }
 }

@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { canUseDatabase, FALLBACK_OVERVIEW } from '@/lib/fallbackData';
+import { canUseDatabase, getFallbackOverview } from '@/lib/fallbackData';
 
 export async function GET() {
   if (!canUseDatabase()) {
-    return NextResponse.json({ success: true, data: FALLBACK_OVERVIEW });
+    return NextResponse.json({ success: true, data: getFallbackOverview() });
   }
 
   try {
@@ -27,6 +27,6 @@ export async function GET() {
       },
     });
   } catch {
-    return NextResponse.json({ success: true, data: FALLBACK_OVERVIEW });
+    return NextResponse.json({ success: true, data: getFallbackOverview() });
   }
 }
