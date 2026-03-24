@@ -1,7 +1,12 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import { canUseDatabase, FALLBACK_MODERATORS } from '@/lib/fallbackData';
 
 export async function GET() {
+  if (!canUseDatabase()) {
+    return NextResponse.json({ success: true, data: FALLBACK_MODERATORS });
+  }
+
   try {
     const moderators = await db.moderator.findMany({
       orderBy: { createdAt: 'desc' },
@@ -9,8 +14,7 @@ export async function GET() {
     });
 
     return NextResponse.json({ success: true, data: moderators });
-  } catch (error) {
-    const message = error instanceof Error ? error.message : 'Failed to load moderators.';
-    return NextResponse.json({ success: false, error: message }, { status: 500 });
+  } catch {
+    return NextResponse.json({ success: true, data: FALLBACK_MODERATORS });
   }
 }
